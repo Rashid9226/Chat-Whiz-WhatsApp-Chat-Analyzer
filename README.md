@@ -1,1 +1,1 @@
-# Chat-Whiz-WhatsApp-Chat-Analyzer
+# ChatWhiz: WhatsApp-Chat-Analyzer
