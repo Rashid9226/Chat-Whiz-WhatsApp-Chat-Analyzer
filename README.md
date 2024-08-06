@@ -1,4 +1,4 @@
-# ChatWhiz: WhatApp-Chat-Analyzer
+# ChatWhiz: WhatsApp-Chat-Analyzer
 
 I always wondered about my WhatsApp chats say about me and my conversations? 🤔 Look no further! I'm thrilled to introduce my new web app that dives deep into my WhatsApp chats, revealing fascinating insights and some amusing surprises!
 
