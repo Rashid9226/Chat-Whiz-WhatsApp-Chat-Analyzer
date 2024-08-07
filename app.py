@@ -4,9 +4,10 @@ import re
 import stats
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
 
-
-st.sidebar.title("Whatsapp Chat Analyzer")
+st.title('ChatWhiz: Whatsapp Chat Analyzer')
+st.sidebar.title("Upload you chat")
 
 # this is for uploading a file
 
@@ -43,7 +44,7 @@ if uploaded_file is not None:
     selected_user = st.sidebar.selectbox(
         "Show analysis with respect to", user_list)
 
-    st.title("Whats App Chat Analysis for " + selected_user)
+    st.markdown(f"<h2>Whats App Chat Analysis for  {selected_user}</h2>",unsafe_allow_html=True)
     if st.sidebar.button("Show Analysis"):
 
         # getting the stats of the selected user from the stats script
@@ -52,23 +53,65 @@ if uploaded_file is not None:
 
         # first phase is to showcase the basic stats like number of users,number of messages,number of media shared and all,so for that i requrire the 4 columns
 
-        col1, col2, col3, col4 = st.columns(4)
+        card_template = """
+                <style>
+                
+                a svg {{
+                    display:none;
+                }}
+                
+                .card {{
+                    background-color: rgba(128, 128, 128, 0.2); /* Transparent grey */
+                    border-radius: 10px;
+                    padding: 20px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                    margin-bottom: 40px;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    border: 1px solid transparent; /* Initial border */
+                }}
 
+                .card:hover {{
+                    transform: translateY(-5px);
+                    box-shadow: 0px 8px 12px rgba(0, 255, 0, 0.5); /* Green glow */
+                    border-color: rgba(0, 255, 0, 0.5); /* Green border on hover */
+                    border-width: 2px; /* Set the width of the border */
+                    border-style: solid; /* Solid border style */
+                }}
+
+
+                .card h3 {{
+                    color: #ffffff;
+                }}
+
+                .card h1 {{
+                    color: #0df005;
+                }}
+                </style>
+
+                <div class="card">
+                    <h3>{header}</h3>
+                    <h1>{title}</h1>
+                </div>
+
+                """
+
+        # Create columns
+        col1, col2 = st.columns(2)
+
+        # Display cards in each column
         with col1:
-            st.header("Total Messages")
-            st.title(num_messages)
+            st.markdown(card_template.format(header="Total Messages", title=num_messages), unsafe_allow_html=True)
 
         with col2:
-            st.header("Total No.of Words")
-            st.title(num_words)
+            st.markdown(card_template.format(header="Total No. of Words", title=num_words), unsafe_allow_html=True)
 
+        col3, col4 = st.columns(2)
         with col3:
-            st.header("Media Shared")
-            st.title(media_omitted)
+            st.markdown(card_template.format(header="Media Shared", title=media_omitted), unsafe_allow_html=True)
 
         with col4:
-            st.header("Total Links Shared")
-            st.title(links)
+            st.markdown(card_template.format(header="Total Links Shared", title=links), unsafe_allow_html=True)
 
         # finding the busiest users in the group
 
@@ -79,28 +122,51 @@ if uploaded_file is not None:
 
             st.title('Most Busy Users')
             busycount, newdf = stats.fetchbusyuser(df)
-            fig, ax = plt.subplots()
-            col1, col2 = st.columns(2)
-            with col1:
-                ax.bar(busycount.index, busycount.values, color='red')
-                plt.xticks(rotation='vertical')
-                st.pyplot(fig)
 
-            with col2:
-                st.dataframe(newdf)
+            colors = ['#e41a1c', '#377eb8', '#4daf4a', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999']
+            # Create a Plotly pie chart
+            fig = go.Figure(data=[go.Pie(
+                labels=busycount.index,
+                values=busycount.values,
+                hole=0.5,
+                textinfo='label+percent',
+                insidetextorientation='radial',
+                marker=dict(colors=colors),
+                hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Percent: %{percent:.1%}<extra></extra>',
+
+            )])
+
+            # Update layout to match your style
+            fig.update_layout(
+                margin=dict(t=50, b=50, l=50, r=50),
+                paper_bgcolor='rgba(128, 128, 128,0.2)',
+                # plot_bgcolor='rgba(128, 255, 255, 0.2)',
+                hoverlabel=dict(bgcolor="Green", font_size=16, font_family="Rockwell"),
+                legend=dict(orientation="h", xanchor="center", x=0.5, y=-0.2),
+            )
+
+            # Display the Plotly figure in Streamlit
+            st.plotly_chart(fig)
 
         # Word Cloud
+        plot_bg_color='#4e524e'
         st.title('Word Cloud')
         df_img = stats.createwordcloud(selected_user, df)
         fig, ax = plt.subplots()
         ax.imshow(df_img)
+        ax.axis('off')  # Hide the axes
+
+        # Update layout colors
+        fig.patch.set_facecolor(plot_bg_color)  # Background color of the figure
+        ax.set_facecolor(plot_bg_color)  # Background color of the plotting area
+
         st.pyplot(fig)
 
         # most common words in the chat
 
         most_common_df = stats.getcommonwords(selected_user, df)
         fig, ax = plt.subplots()
-        ax.barh(most_common_df[0], most_common_df[1])
+        ax.barh(most_common_df[0], most_common_df[1],color='Green')
         plt.xticks(rotation='vertical')
         st.title('Most commmon words')
         st.pyplot(fig)
@@ -147,7 +213,7 @@ if uploaded_file is not None:
             busy_day = stats.weekactivitymap(selected_user, df)
 
             fig, ax = plt.subplots()
-            ax.bar(busy_day.index, busy_day.values, color='purple')
+            ax.bar(busy_day.index, busy_day.values, color='Green')
             plt.xticks(rotation='vertical')
             plt.tight_layout()
             st.pyplot(fig)
@@ -158,7 +224,7 @@ if uploaded_file is not None:
             busy_month = stats.monthactivitymap(selected_user, df)
 
             fig, ax = plt.subplots()
-            ax.bar(busy_month.index, busy_month.values, color='orange')
+            ax.bar(busy_month.index, busy_month.values, color='Yellow')
             plt.xticks(rotation='vertical')
             plt.tight_layout()
             st.pyplot(fig)

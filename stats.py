@@ -52,7 +52,7 @@ def createwordcloud(selected_user, df):
         df = df[df['User'] == selected_user]
 
     wc = WordCloud(width=500, height=500,
-                   min_font_size=10, background_color='white')
+                   min_font_size=10, background_color='Black')
 
     df_wc = wc.generate(df['Message'].str.cat(sep=" "))
 
