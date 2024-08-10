@@ -2,8 +2,13 @@ from urlextract import URLExtract
 import pandas as pd
 from collections import Counter
 from wordcloud import WordCloud
-
+import numpy as np
 import emoji
+
+# Use a pipeline as a high-level helper
+from transformers import pipeline
+
+pipe = pipeline("text-classification", model="avichr/heBERT_sentiment_analysis")
 
 
 extract = URLExtract()
@@ -131,3 +136,49 @@ def weekactivitymap(selecteduser, df):
         df = df[df['User'] == selecteduser]
 
     return df['Day_name'].value_counts()
+
+
+def Sentiment_analysis(selecteduser, df):
+    
+    if selecteduser != 'Overall':
+        df = df[df['User'] == selecteduser]
+
+    # Analyze sentiments
+    results = pipe(df['Message'].tolist())
+    
+    
+    
+    # Overall by Majority
+
+    # Count the occurrences of each sentiment
+    sentiment_counts = {'POSITIVE': 0, 'NEGATIVE': 0, 'NEUTRAL': 0}
+
+    for result in results:
+        label = result['label'].upper()
+        if label in sentiment_counts:
+            sentiment_counts[label] += 1
+        else:
+            sentiment_counts['NEUTRAL'] += 1  # Handle unexpected labels as neutral
+
+    # Determine the overall sentiment based on the majority
+    if sentiment_counts['POSITIVE'] > sentiment_counts['NEGATIVE'] and sentiment_counts['POSITIVE'] > sentiment_counts['NEUTRAL']:
+        overall_sentiment = 'Positive'
+    elif sentiment_counts['NEGATIVE'] > sentiment_counts['POSITIVE'] and sentiment_counts['NEGATIVE'] > sentiment_counts['NEUTRAL']:
+        overall_sentiment = 'Negative'
+    elif sentiment_counts['NEUTRAL'] > sentiment_counts['POSITIVE'] and sentiment_counts['NEUTRAL'] > sentiment_counts['NEGATIVE']:
+        overall_sentiment = 'Neutral'
+    else:
+        # If there's a tie, calculate the weighted score
+        weights = {'POSITIVE': 1, 'NEGATIVE': -1, 'NEUTRAL': 0}
+        weighted_score = (sentiment_counts['POSITIVE'] * weights['POSITIVE'] +
+                          sentiment_counts['NEGATIVE'] * weights['NEGATIVE'] +
+                          sentiment_counts['NEUTRAL'] * weights['NEUTRAL'])
+
+        if weighted_score > 0:
+            overall_sentiment = 'Positive'
+        elif weighted_score < 0:
+            overall_sentiment = 'Negative'
+        else:
+            overall_sentiment = 'Neutral'
+
+    return overall_sentiment, sentiment_counts

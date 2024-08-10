@@ -44,8 +44,9 @@ if uploaded_file is not None:
     selected_user = st.sidebar.selectbox(
         "Show analysis with respect to", user_list)
 
-    st.markdown(f"<h2>Whats App Chat Analysis for  {selected_user}</h2>",unsafe_allow_html=True)
+    
     if st.sidebar.button("Show Analysis"):
+        st.markdown(f"<h2>Whats App Chat Analysis for  {selected_user}</h2>",unsafe_allow_html=True)
 
         # getting the stats of the selected user from the stats script
 
@@ -230,4 +231,83 @@ if uploaded_file is not None:
             st.pyplot(fig)
 
 
+    
+    if st.sidebar.button("Show Sentiment Analysis", key='SA'):
+        overall_sentiment, sentiment_counts = stats.Sentiment_analysis(selected_user, df)
+        st.markdown(f"""<h2>Sentiment Analysis of {selected_user}</h2>
+                    <span style="cursor: pointer; color: blue;" 
+                    title="The Overall Sentiment is calculated by the majority of messages of the sentiments,
+                    and if two values are equal then weighted score is used">ℹ️</span>""", unsafe_allow_html=True)
+        
+        # st.write(f"Overall Sentiment: **{overall_sentiment}**")
+        # st.write(f"Positive: {sentiment_counts['POSITIVE']} messages")
+        # st.write(f"Negative: {sentiment_counts['NEGATIVE']} messages")
+        # st.write(f"Neutral: {sentiment_counts['NEUTRAL']} messages")
+        
+        if overall_sentiment == 'Positive':
+            background_color = '#4CAF50'
+            shadow_color = '#388E3C'
+        elif overall_sentiment == 'Negative':
+            background_color = '#f44336'
+            shadow_color = '#d32f2f'
+        else:
+            background_color = '#FFC107'
+            shadow_color = '#FFA000'
+            # box-shadow: 0px 4px 8px {shadow_color};
 
+        
+        st.markdown(
+            f"""
+            <div style='background-color:{background_color}; padding: 20px; border-radius: 10px;
+            text-align: center;
+            margin-bottom:20px'>
+            <h3>Overall Sentiment</h3>
+            <p style='font-size: 24px; font-weight: bold;'>{overall_sentiment}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        col1, col2 = st.columns(2)
+
+
+        # Card 2: Positive Sentiment
+        with col1:
+            st.markdown(
+                f"""
+                <div style='background-color:#2196F3; padding: 20px; border-radius: 10px;
+                text-align: center;
+                margin-bottom:20px'>
+                    <h3>Positive</h3>
+                    <p style='font-size: 24px; font-weight: bold;'>{sentiment_counts['POSITIVE']} messages</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        # Card 3: Negative Sentiment
+        with col2:
+            st.markdown(
+                f"""
+                <div style='background-color:#f44336; padding: 20px; border-radius: 10px; text-align: center;'>
+                    <h3>Negative</h3>
+                    <p style='font-size: 24px; font-weight: bold;'>{sentiment_counts['NEGATIVE']} messages</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
+        col1, col2, col3= st.columns(3)
+
+        # Card 4: Neutral Sentiment
+        with col2:
+            st.markdown(
+                f"""
+                <div style='background-color:#FFC107; padding: 20px; border-radius: 10px; text-align: center;'>
+                    <h3>Neutral</h3>
+                    <p style='font-size: 24px; font-weight: bold;'>{sentiment_counts['NEUTRAL']} messages</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+                
