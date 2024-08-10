@@ -7,6 +7,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 st.title('ChatWhiz: Whatsapp Chat Analyzer')
+st.image(image='https://media.licdn.com/dms/image/D4D12AQEu9_StFdixAw/article-cover_image-shrink_720_1280/0/1705995862455?e=2147483647&v=beta&t=xjom0rPO_oxs42THgnbbiddh9txFWt17z7jy7fwfbRw')
 st.sidebar.title("Upload you chat")
 
 # this is for uploading a file
